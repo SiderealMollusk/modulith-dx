@@ -2,6 +2,22 @@
 
 Observability-ready TypeScript modular monolith with DDD/TDD structure, strict linting, and full telemetry stack.
 
+## Quick Links
+
+### 🆕 Getting Started
+- [**Quick Start Guide**](docs/tooling/quick-start.md) — How to create your first primitive (manual + generators)
+- [**Tooling Overview**](docs/tooling/SUMMARY.md) — What tooling exists + implementation roadmap
+
+### 🏗️ Architecture & Design
+- [**DDD Primitives**](docs/ddd-implementation/primitives/README.md) — All 13 primitives with specs (entities, commands, use cases, etc.)
+- [**Architecture Decisions**](docs/architecture-decisions/adr_index.md) — All decisions with enforcement details
+- [**Command/Query as Primitives**](docs/architecture-decisions/accepted/command-query-as-primitives.md) — Why we have 13 primitives
+
+### 🛠️ Tooling Infrastructure (🟠 [Planned, not yet built](docs/tooling/status.md))
+- **Generators**: Create [Commands](docs/tooling/generators/command.md), [Entities](docs/tooling/generators/entity.md), [UseCases](docs/tooling/generators/use-case.md), etc.
+- **ADR Management**: [Create & manage architecture decisions](docs/tooling/adr-management/specification.md)
+- **Validation**: [ESLint rules](docs/tooling/eslint-rules/README.md) + [CI/CD scripts](docs/tooling/ci-scripts/README.md)
+
 ## Architecture
 
 This is a **modular monolith** structured around Domain-Driven Design principles with separate bounded contexts that can eventually be extracted into microservices if needed.
