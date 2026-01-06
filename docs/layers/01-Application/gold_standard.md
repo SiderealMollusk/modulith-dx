@@ -2,7 +2,7 @@
 
 Your TypeScript/Node.js domain logic, organized by bounded contexts using DDD principles.
 
-> **Note:** This layer uses DDD primitives (Commands, Queries, Entities, Use Cases, Handlers, Repositories, Value Objects, Domain Events). For detailed specs, enforcement rules, and generators for each primitive, see [PRIMITIVES_MANIFEST.md](../../PRIMITIVES_MANIFEST.md).
+> **Note:** This layer uses DDD primitives (Commands, Queries, Entities, Use Cases, Handlers, Repositories, Value Objects, Domain Events). For specs, enforcement rules, and generators, see the [Primitives Quick Reference](../../ddd-implementation/README.md#primitives-quick-reference) in the DDD framework docs.
 
 ## Overview
 
@@ -43,7 +43,7 @@ The Application layer uses standard DDD primitives to organize code:
 | **Repository** | `application/ports/` + `infrastructure/adapters/` | Data access abstraction | [spec](../../PRIMITIVES_MANIFEST.md#7-repository-port--adapter) |
 | **DomainEvent** | `domain/events/` | Immutable record of what happened | [spec](../../PRIMITIVES_MANIFEST.md#8-domain-event) |
 
-For each primitive, [PRIMITIVES_MANIFEST.md](../../PRIMITIVES_MANIFEST.md) provides:
+For each primitive, [ddd-implementation/README.md](../../ddd-implementation/README.md#primitives-quick-reference) provides:
 - Full specification and enforcement rules
 - Generator commands to scaffold
 - Instance-level spec/enforcement templates to customize per artifact
@@ -94,7 +94,7 @@ Each generator creates:
 - **Instance spec file** ({Name}.specification.md) — customize what makes this artifact unique
 - **Instance enforcement file** ({Name}.enforcement.md) — document what must not change
 
-See [PRIMITIVES_MANIFEST.md](../../PRIMITIVES_MANIFEST.md) for generator details and specs per primitive.
+See [ddd-implementation/README.md](../../ddd-implementation/README.md#primitives-quick-reference) for generator details and specs per primitive.
 
 ---
 

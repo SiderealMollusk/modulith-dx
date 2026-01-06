@@ -74,6 +74,22 @@ src/core/{context}/{feature}/
 - Version events; keep toPrimitives stable across versions.
 - Keep adapters behind ports; swap implementations without touching use cases.
 
+## Primitives Quick Reference
+
+| Primitive | Location | Spec | Enforcement | Generator | Instance Templates |
+|-----------|----------|------|-------------|-----------|-------------------|
+| **Command** | `application/commands/` | [spec](primitives/command/specification.md) | [enf](primitives/command/enforcement.md) | [gen](../tooling/generators/command.md) | [spec](../tooling/generators/command.md#template-namespecificationmd-generate-alongside-the-command) + [enf](../tooling/generators/command.md#template-nameenforcementmd-generate-alongside-the-command) |
+| **Query** | `application/queries/` | [spec](primitives/query/specification.md) | [enf](primitives/query/enforcement.md) | [gen](../tooling/generators/query.md) | [spec](../tooling/generators/query.md#template-namespecificationmd-generate-alongside-the-query) + [enf](../tooling/generators/query.md#template-nameenforcementmd-generate-alongside-the-query) |
+| **Entity** | `domain/entities/` | [spec](primitives/entity/specification.md) | [enf](primitives/entity/enforcement.md) | [gen](../tooling/generators/entity.md) | [spec](../tooling/generators/entity.md#template-namespecificationmd-generate-alongside-the-entity) + [enf](../tooling/generators/entity.md#template-nameenforcementmd-generate-alongside-the-entity) |
+| **ValueObject** | `domain/value-objects/` | [spec](primitives/value-object/specification.md) | [enf](primitives/value-object/enforcement.md) | [gen](../tooling/generators/value-object.md) | [spec](../tooling/generators/value-object.md#template-namespecificationmd-generate-alongside-the-value-object) + [enf](../tooling/generators/value-object.md#template-nameenforcementmd-generate-alongside-the-value-object) |
+| **UseCase** | `application/use-cases/` | [spec](primitives/use-case/specification.md) | [enf](primitives/use-case/enforcement.md) | [gen](../tooling/generators/use-case.md) | [spec](../tooling/generators/use-case.md#template-namespecificationmd-generate-alongside-the-use-case) + [enf](../tooling/generators/use-case.md#template-nameenforcementmd-generate-alongside-the-use-case) |
+| **Handler** | `interface/handlers/` | [spec](primitives/handler/specification.md) | [enf](primitives/handler/enforcement.md) | [gen](../tooling/generators/handler.md) | [spec](../tooling/generators/handler.md#template-namespecificationmd-generate-alongside-the-handler) + [enf](../tooling/generators/handler.md#template-nameenforcementmd-generate-alongside-the-handler) |
+| **Repository** | `application/ports/` + `infrastructure/adapters/` | [spec](primitives/repository/specification.md) | [enf](primitives/repository/enforcement.md) | [gen](../tooling/generators/repository.md) | [spec](../tooling/generators/repository.md#template-namespecificationmd-generate-alongside-the-repository) + [enf](../tooling/generators/repository.md#template-nameenforcementmd-generate-alongside-the-repository) |
+| **DomainEvent** | `domain/events/` | [spec](primitives/domain-event/specification.md) | [enf](primitives/domain-event/enforcement.md) | [gen](../tooling/generators/domain-event.md) (planned) | planned |
+
+**How to use:** Pick a primitive, read its spec + enforcement. Use the generator to scaffold: `nx generate @local/ddd:{primitive} --context={context} --name={name}`. Customize using the instance spec/enforcement templates (embedded in the generator doc).
+
 ## Next Steps
 - Add concrete base class stubs in `src/shared/kernel` (BaseUseCase, BaseHandler, BaseRepositoryAdapter, etc.).
 - Add generators to scaffold feature slices and individual DDD primitives with tests and observability baked in.
+
