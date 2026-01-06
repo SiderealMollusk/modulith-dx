@@ -10,20 +10,20 @@ See [docs/ddd-implementation/primitives/use-case/specification.md](../../ddd-imp
 nx generate @local/ddd:use-case --context=orders --name=PlaceOrder
 ```
 
-**Creates**:
+Creates:
 ```
 src/core/orders/application/use-cases/
 ├── PlaceOrderUseCase.ts (generated)
-└── PlaceOrderUseCase.spec.ts (generated unit test)
+├── PlaceOrderUseCase.spec.ts (generated unit test)
 └── PlaceOrderUseCase.integration.spec.ts (optional stub)
 ```
+
+See [TEMPLATE.md](TEMPLATE.md) for common patterns (base class, dependency injection, Result type, etc).
 
 ## Generated Structure
 
 ### UseCase Class
 ```typescript
-import { BaseUseCase, Result } from '@shared/kernel';
-
 export class PlaceOrderUseCase extends BaseUseCase<PlaceOrderInput, OrderDto> {
   constructor(
     private orderRepository: OrderRepository,
@@ -107,6 +107,31 @@ describe('PlaceOrderUseCase (Unit)', () => {
 - ✅ Unit tests with mocks
 - ✅ Integration test stub (optional)
 
+## Key Rules
+
+✅ **DO**:
+- Take Commands/Queries as input
+- Load aggregates from repositories
+- Perform domain operations
+- Return DTOs (not entities)
+- Publish domain events
+- Inject dependencies via constructor
+- Write both unit and integration tests
+
+❌ **DON'T**:
+- Query database directly (use repositories)
+- Include HTTP/gRPC logic (handlers do that)
+- Throw exceptions (return Result instead)
+- Return domain entities (convert to DTOs)
+- Skip testing for edge cases
+
+## Related Documentation
+
+- [UseCase specification](../../ddd-implementation/primitives/use-case/specification.md)
+- [Handler generator](handler.md) — Handlers call use cases
+- [Command/Query generators](command.md) — Input to use cases
+- [Repository generator](repository.md) — Dependencies for use cases
+
 ---
 
-For full spec, see [docs/ddd-implementation/primitives/use-case/specification.md](../../ddd-implementation/primitives/use-case/specification.md).
+See [generators/README.md](README.md) for overview of all generators.

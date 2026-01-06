@@ -10,7 +10,7 @@ See [docs/ddd-implementation/primitives/repository/specification.md](../../ddd-i
 nx generate @local/ddd:repository --context=orders --aggregate=Order
 ```
 
-**Creates**:
+Creates:
 ```
 src/core/orders/
 ├── application/
@@ -23,12 +23,12 @@ src/core/orders/
         └── InMemoryOrderRepository.integration.spec.ts (test)
 ```
 
+See [TEMPLATE.md](TEMPLATE.md) for common patterns (base class, dependency injection, Result type, etc).
+
 ## Generated Structure
 
 ### Port (Interface)
 ```typescript
-import { Result } from '@shared/kernel';
-
 export interface OrderRepository {
   findById(id: OrderId): Promise<Result<Order | null, RepositoryError>>;
   findAll(): Promise<Result<Order[], RepositoryError>>;
@@ -41,8 +41,6 @@ export interface OrderRepository {
 
 ### Adapter (In-Memory Implementation)
 ```typescript
-import { BaseRepositoryAdapter } from '@shared/kernel';
-
 export class InMemoryOrderRepository extends BaseRepositoryAdapter<OrderRepository> implements OrderRepository {
   private orders = new Map<string, Order>();
 
@@ -110,14 +108,14 @@ describe('InMemoryOrderRepository (Integration)', () => {
 - ✅ Port (interface) in `application/ports/`
 - ✅ Adapter (implementation) in `infrastructure/adapters/`
 - ✅ Extends `BaseRepositoryAdapter` for observability
-- ✅ Returns `Result<T, RepositoryError>`
+- ✅ Returns `Promise<Result<T, RepositoryError>>`
 - ✅ Full logging/tracing via `withSpan()`
 - ✅ In-memory implementation for testing
 - ✅ Integration tests (with real repository)
 
-## Dependency Injection
+## Dependency Injection Pattern
 
-In UseCase:
+### In UseCase
 ```typescript
 export class PlaceOrderUseCase extends BaseUseCase<PlaceOrderInput, OrderDto> {
   constructor(
@@ -134,7 +132,7 @@ export class PlaceOrderUseCase extends BaseUseCase<PlaceOrderInput, OrderDto> {
 }
 ```
 
-In Handler/Bootstrap:
+### In Handler/Bootstrap
 ```typescript
 // ✅ Inject concrete adapter, not interface
 const orderRepository: OrderRepository = new InMemoryOrderRepository();
@@ -142,6 +140,27 @@ const orderRepository: OrderRepository = new InMemoryOrderRepository();
 const useCase = new PlaceOrderUseCase(orderRepository, eventBus);
 ```
 
+## Key Rules
+
+✅ **DO**:
+- Create port (interface) separate from adapters
+- Return `Result<T, RepositoryError>` from all methods
+- Use `withSpan()` for observability
+- Create at least one concrete adapter (in-memory)
+- Include integration tests
+
+❌ **DON'T**:
+- Expose repository implementation details in port
+- Throw exceptions (return Result instead)
+- Include business logic in repository
+- Forget logging/tracing
+
+## Related Documentation
+
+- [Repository specification](../../ddd-implementation/primitives/repository/specification.md)
+- [UseCase generator](use-case.md) — Uses repositories
+- [Ports and Adapters](../../ddd-implementation/primitives/repository/specification.md#pattern)
+
 ---
 
-For full spec, see [docs/ddd-implementation/primitives/repository/specification.md](../../ddd-implementation/primitives/repository/specification.md).
+See [generators/README.md](README.md) for overview of all generators.

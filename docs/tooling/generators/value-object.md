@@ -10,19 +10,19 @@ See [docs/ddd-implementation/primitives/value-object/specification.md](../../ddd
 nx generate @local/ddd:value-object --context=identity --name=Email
 ```
 
-**Creates**:
+Creates:
 ```
 src/core/identity/domain/value-objects/
 ├── Email.ts (generated)
 └── Email.spec.ts (generated)
 ```
 
+See [TEMPLATE.md](TEMPLATE.md) for common patterns (base class, private constructor, Result type, etc).
+
 ## Generated Structure
 
 ### ValueObject Class
 ```typescript
-import { ValueObject, Result, DomainError } from '@shared/kernel';
-
 export class Email extends ValueObject<string> {
   private constructor(readonly value: string) {
     super(value);
@@ -93,3 +93,28 @@ describe('Email ValueObject', () => {
 - ✅ Validation via Zod or custom logic
 - ✅ Structural equality (ValueObject.equals)
 - ✅ Includes unit test stub
+
+## Key Rules
+
+✅ **DO**:
+- Validate in static factory
+- Use structural equality for comparison
+- Make all fields readonly
+- Return Result<ValueObject, DomainError>
+- Implement custom validation logic
+
+❌ **DON'T**:
+- Create value objects with invalid state
+- Use reference equality (identity)
+- Include business logic beyond validation
+- Throw exceptions (return Result instead)
+
+## Related Documentation
+
+- [ValueObject specification](../../ddd-implementation/primitives/value-object/specification.md)
+- [Entity generator](entity.md) — Uses ValueObjects
+- [Brand types](../../ddd-implementation/primitives/entity/specification.md#identity) — Specialized ValueObjects for IDs
+
+---
+
+See [generators/README.md](README.md) for overview of all generators.

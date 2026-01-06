@@ -10,6 +10,14 @@ The ADR tool automates the workflow for creating, managing, and tracking Archite
 
 ## Commands (Nx Integration)
 
+**Full CRUD + State Transitions**:
+- **Create**: `nx generate @local/adr:new --slug=<slug>`
+- **Read**: `nx run tooling:adr-list` (with filters)
+- **Update**: Edit file directly in editor
+- **Delete**: Not supported (use Deprecate instead)
+- **State**: `nx run tooling:adr-accept`, `adr-deprecate`, `adr-supersede`
+- **Validate**: `nx run tooling:adr-validate`
+
 ### `nx generate @local/adr:new --slug=<slug>`
 
 Create a new ADR in `docs/architecture-decisions/proposed/`.
@@ -54,6 +62,29 @@ nx run tooling:adr-accept --slug=domain-layer-must-be-pure
 ✓ Updated: adr_index.md
 ? Next: Add enforcement rules to tools/eslint-plugin/ or ops/scripts/
 ```
+
+---
+
+### Edit ADR Content
+
+Edit ADRs directly in your editor. The ADR tool doesn't lock files.
+
+```bash
+# Create the ADR
+nx generate @local/adr:new --slug=domain-layer-must-be-pure
+
+# Edit the content in your editor
+$EDITOR docs/architecture-decisions/proposed/ADR-0021-domain-layer-must-be-pure.md
+
+# When satisfied, accept it
+nx run tooling:adr-accept --slug=domain-layer-must-be-pure
+```
+
+**Rules**:
+- ✅ Change Problem, Decision, Why This Matters, Trade-offs, Enforcement, References freely
+- ✅ Change Tags and Impact before accepting
+- ❌ Don't change Status manually (use executors instead)
+- ❌ Don't change ADR number or slug after created
 
 ---
 

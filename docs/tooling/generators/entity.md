@@ -10,7 +10,7 @@ See [docs/ddd-implementation/primitives/entity/specification.md](../../ddd-imple
 nx generate @local/ddd:entity --context=orders --name=Order --idType=OrderId
 ```
 
-**Creates**:
+Creates:
 ```
 src/core/orders/
 ├── domain/
@@ -24,6 +24,8 @@ src/core/orders/
             └── entities/
                 └── Order.spec.ts (generated)
 ```
+
+See [TEMPLATE.md](TEMPLATE.md) for common patterns (base class, private constructor, Result type, etc).
 
 ## Generated Structure
 
@@ -88,11 +90,22 @@ describe('Order', () => {
 
 ## Key Features
 
-- ✅ Extends `BaseEntity<TId>`
+- ✅ Extends `BaseEntity<TId>` (aggregate root)
+- ✅ Brand ID type (e.g., `OrderId`)
 - ✅ Private constructor + static factory
 - ✅ All fields readonly
-- ✅ Returns `Result<Order, DomainError>`
+- ✅ Returns `Result<Entity, DomainError>`
 - ✅ Includes unit test stub
-- ✅ Supports event collection (via BaseEntity)
+- ✅ Supports domain event collection via `BaseEntity`
+- ✅ Invariant enforcement (business rules)
 
-See [Command Generator](command.md) for detailed walkthrough example.
+## Related Documentation
+
+- [Entity specification](../../ddd-implementation/primitives/entity/specification.md)
+- [Entity enforcement](../../ddd-implementation/primitives/entity/enforcement.md)
+- [Aggregate root pattern](../../ddd-implementation/primitives/aggregate-root/specification.md)
+- [Brand IDs](../../ddd-implementation/primitives/entity/specification.md#identity)
+
+---
+
+See [generators/README.md](README.md) for overview of all generators.

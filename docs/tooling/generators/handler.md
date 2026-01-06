@@ -17,7 +17,7 @@ nx generate @local/ddd:handler --context=orders --name=PlaceOrder --protocol=grp
 nx generate @local/ddd:handler --context=orders --name=PlaceOrder --protocol=cli
 ```
 
-**Creates**:
+Creates:
 ```
 src/core/orders/interface/handlers/
 ├── PlaceOrderHttpHandler.ts (or PlaceOrderGrpcHandler, PlaceOrderCliHandler)
@@ -25,12 +25,12 @@ src/core/orders/interface/handlers/
 └── PlaceOrderHttpHandler.integration.spec.ts (optional stub)
 ```
 
+See [TEMPLATE.md](TEMPLATE.md) for common patterns (base class, dependency injection, Result type, etc).
+
 ## Generated Structure (HTTP Example)
 
 ### Handler Class
 ```typescript
-import { BaseHttpHandler } from '@shared/kernel';
-
 export class PlaceOrderHttpHandler extends BaseHttpHandler {
   constructor(
     private placeOrderUseCase: PlaceOrderUseCase,
@@ -119,12 +119,12 @@ describe('PlaceOrderHttpHandler (Unit)', () => {
   });
 
   describe('business rule failures', () => {
-    it('should return 409 for business rule violation', async () => {
+    it('should return error for business rule violation', async () => {
       useCase.setFailure(new ApplicationError('CUSTOMER_NOT_FOUND', ...));
 
       await handler.handle(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(500); // or 409, 422, etc.
+      expect(res.status).toHaveBeenCalledWith(500);
     });
   });
 });
@@ -169,6 +169,27 @@ export class MyCliHandler extends BaseCliHandler {
 - ✅ Unit tests with mocks
 - ✅ Integration test stub (optional)
 
+## Key Rules
+
+✅ **DO**:
+- Validate input before executing use case
+- Map domain errors to appropriate status codes
+- Include both unit and integration tests
+- Handle and log errors appropriately
+- Use dependency injection via constructor
+
+❌ **DON'T**:
+- Include business logic (use cases handle that)
+- Throw uncaught exceptions
+- Skip error handling
+- Create tight coupling to specific adapters
+
+## Related Documentation
+
+- [Handler specification](../../ddd-implementation/primitives/handler/specification.md)
+- [UseCase spec](../../ddd-implementation/primitives/use-case/specification.md) — Handlers call use cases
+- [Command/Query generators](command.md) — Handlers validate these
+
 ---
 
-For full spec, see [docs/ddd-implementation/primitives/handler/specification.md](../../ddd-implementation/primitives/handler/specification.md).
+See [generators/README.md](README.md) for overview of all generators.

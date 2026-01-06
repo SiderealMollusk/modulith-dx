@@ -2,7 +2,15 @@
 
 **Status**: 🟠 [Not yet implemented](../status.md) — this is the specification.
 
-Similar to [Command Generator](command.md) but for **read operations**.
+## When to Use
+
+Create a **Query** when you need to **read data** without mutation:
+- Fetch user by ID
+- List orders for customer
+- Search products
+- Calculate report totals
+
+**Not for**: Mutating state (use Command instead).
 
 ## Quick Start
 
@@ -10,39 +18,29 @@ Similar to [Command Generator](command.md) but for **read operations**.
 nx generate @local/ddd:query --context=orders --name=GetOrdersByCustomer --result="Order[]"
 ```
 
-**Creates**:
-- `GetOrdersByCustomer.ts`
-- `GetOrdersByCustomer.validation.spec.ts`
-- `GetOrdersByCustomer.serialization.spec.ts`
+Creates:
+```
+src/core/orders/application/queries/
+├── GetOrdersByCustomer.ts
+├── GetOrdersByCustomer.validation.spec.ts
+├── GetOrdersByCustomer.serialization.spec.ts
+└── index.ts (updated)
+```
+
+See [TEMPLATE.md](TEMPLATE.md) for common patterns (base class, private constructor, Result type, etc).
 
 ## Key Differences from Command
 
-### Query
-```typescript
-export class GetOrdersByCustomer extends Query<Order[]> {
-  readonly cacheKey: string; // ✅ Queries often cached
+| Aspect | Command | Query |
+|--------|---------|-------|
+| **Purpose** | Mutate state | Read data |
+| **Idempotency** | ✅ Via `id` field | N/A (read-only) |
+| **Caching** | ❌ No | ✅ Via `cacheKey` |
+| **Side effects** | Changes database | None |
 
-  static create(customerId: string): Result<GetOrdersByCustomer, ValidationError> {
-    // Same Zod validation + Result pattern
-  }
+## Unique Features
 
-  toPrimitives() { }
-  static fromPrimitives(data) { }
-}
-```
-
-### vs Command
-```typescript
-// ❌ Commands mutate
-export class PlaceOrder extends Command<Order> { }
-
-// ✅ Queries read
-export class GetOrdersByCustomer extends Query<Order[]> { }
-```
-
-## Caching Support
-
-Queries support caching via `cacheKey`:
+### 1. Cache Key Support
 
 ```typescript
 export class GetUserById extends Query<UserDto> {
@@ -56,16 +54,16 @@ export class GetUserById extends Query<UserDto> {
   }
 
   static create(userId: string): Result<GetUserById, ValidationError> {
-    // ...
     return Result.ok(new GetUserById(
       userId,
-      `user:${userId}`, // Cache key
+      `user:${userId}`, // Cache key pattern
     ));
   }
 }
 ```
 
-Handler can use:
+### 2. Handler Cache Usage
+
 ```typescript
 async handle(req): Promise<Result<UserDto, Error>> {
   const query = GetUserById.create(req.params.id).value!;
@@ -74,7 +72,7 @@ async handle(req): Promise<Result<UserDto, Error>> {
   const cached = await this.cache.get(query.cacheKey);
   if (cached) return Result.ok(cached);
 
-  // Execute query if cache miss
+  // Cache miss: execute query
   const result = await this.useCase.execute(query);
   if (result.isSuccess) {
     await this.cache.set(query.cacheKey, result.value, 300); // 5 min TTL
@@ -83,14 +81,35 @@ async handle(req): Promise<Result<UserDto, Error>> {
 }
 ```
 
-## Testing
+## Test Files
 
-Same 2 test files as Command:
-- `{Name}.validation.spec.ts` — Zod schema tests
-- `{Name}.serialization.spec.ts` — Round-trip tests
+Same as Command generator:
 
-See [Command Generator](command.md) for detailed test examples.
+1. **`{Name}.validation.spec.ts`** — Zod schema tests
+2. **`{Name}.serialization.spec.ts`** — Round-trip tests
+
+## Key Rules
+
+✅ **DO**:
+- Use Zod for validation schema
+- Return `Result<Query, ValidationError>` from factory
+- Implement `cacheKey` for caching strategy
+- Make all fields `readonly`
+- Implement `toPrimitives()` + `fromPrimitives()`
+
+❌ **DON'T**:
+- Query with side effects (use Command for mutations)
+- Throw exceptions (return Result instead)
+- Make query mutable
+- Forget cache key strategy
+
+## Related Documentation
+
+- [Query specification](../../ddd-implementation/primitives/query/specification.md)
+- [Command Generator](command.md) — Similar structure, different purpose
+- [ADR-0002: Command/Query as First-Class Primitives](../../architecture-decisions/accepted/command-query-as-primitives.md)
+- [UseCase spec](../../ddd-implementation/primitives/use-case/specification.md) — Queries are input to use cases
 
 ---
 
-For full spec, see [docs/ddd-implementation/primitives/query/specification.md](../../ddd-implementation/primitives/query/specification.md).
+See [generators/README.md](README.md) for overview of all generators.
