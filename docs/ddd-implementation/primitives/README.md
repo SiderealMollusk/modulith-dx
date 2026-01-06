@@ -1,6 +1,6 @@
 # DDD Primitives: Complete Reference
 
-This directory contains comprehensive documentation for all 11 DDD primitives used in this repository. Each primitive has two documents:
+This directory contains comprehensive documentation for all 13 DDD primitives used in this repository. Each primitive has two documents:
 
 1. **specification.md** - Requirements, patterns, examples, testing
 2. **enforcement.md** - Automation mapping (ESLint, generators, CI, manual review)
@@ -74,10 +74,28 @@ This directory contains comprehensive documentation for all 11 DDD primitives us
 
 ### Application Layer (Orchestration + Ports)
 
+#### [Command](./command/)
+> Serializable, immutable request to mutate application state
+
+- **When**: User/system initiates mutating action
+- **Base**: `Command<TResult>` abstract class
+- **Location**: `src/core/{context}/application/commands/`
+- **Tests**: Unit (validation, serialization)
+- **Observability**: ✅ Tracing via commandId + correlationId
+
+#### [Query](./query/)
+> Serializable, immutable request to read application state
+
+- **When**: User/system initiates read operation
+- **Base**: `Query<TResult>` abstract class
+- **Location**: `src/core/{context}/application/queries/`
+- **Tests**: Unit (validation, serialization)
+- **Observability**: ✅ Tracing via queryId + cacheKey
+
 #### [UseCase](./use-case/)
 > Single application operation orchestrating domain logic
 
-- **When**: User/system initiates action, transaction boundary
+- **When**: Command/Query handler, business operation
 - **Base**: `BaseUseCase<TInput, TOutput>`
 - **Location**: `src/core/{context}/application/use-cases/`
 - **Tests**: Unit (core), Integration, E2E
@@ -140,6 +158,8 @@ This directory contains comprehensive documentation for all 11 DDD primitives us
 | Specification | ✅ Required | ❌ N/A | ⏭️ Via Entity |
 | DomainService | ✅ Required | ❌ N/A | ⏭️ Via UseCase |
 | Factory | ✅ Required | ❌ N/A | ⏭️ Via UseCase |
+| Command | ✅ Required | ⏭️ Via CommandBus | ⏭️ Via Handler |
+| Query | ✅ Required | ⏭️ Via QueryBus | ⏭️ Via Handler |
 | UseCase | ✅ Required | ✅ Required | ✅ Required |
 | Repository (Port) | ❌ N/A (interface) | ❌ N/A | ❌ N/A |
 | Repository (Adapter) | ❌ N/A | ✅ Required | ⏭️ Via UseCase |
@@ -156,6 +176,8 @@ This directory contains comprehensive documentation for all 11 DDD primitives us
 - **DomainService**: 70% (ESLint + Generator)
 - **UseCase**: 73% (ESLint + Base Class + Generator)
 - **Factory**: 73% (ESLint + Generator)
+- **Command**: 67% (ESLint + Generator)
+- **Query**: 69% (ESLint + Generator)
 
 ### Moderately Automated (60-69%)
 - **AggregateRoot**: 68% (ESLint + TypeScript + Generator)
@@ -192,6 +214,8 @@ nx generate {primitive} --context={context} --name={Name}
 Examples:
 ```bash
 nx generate entity --context=identity --name=User
+nx generate command --context=orders --name=PlaceOrder --result=Order
+nx generate query --context=orders --name=FindOrdersByCustomer --result="Order[]"
 nx generate use-case --context=orders --name=PlaceOrder
 nx generate handler --context=identity --name=CreateUser --protocol=http
 nx generate repository --context=identity --aggregate=User
@@ -205,6 +229,8 @@ nx generate repository --context=identity --aggregate=User
 **Need complex validation rule?** → Specification  
 **Need stateless domain logic?** → DomainService  
 **Need complex creation?** → Factory  
+**Need to mutate state?** → Command (→ UseCase)  
+**Need to read state?** → Query (→ UseCase)  
 **Need to orchestrate?** → UseCase  
 **Need to persist?** → Repository (Port + Adapter)  
 **Need external interface?** → Handler  
