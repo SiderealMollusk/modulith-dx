@@ -1,0 +1,34 @@
+{
+  "name": "modulith-dx",
+  "version": "1.0.0",
+  "description": "Observability-ready TypeScript modular monolith with DDD/TDD structure, strict linting, and full telemetry stack.",
+  "type": "module",
+  "main": "dist/index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:unit": "vitest run tests/unit",
+    "test:integration": "vitest run tests/integration",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "ddd",
+    "modular-monolith",
+    "typescript",
+    "otel"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^25.0.3",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "^1.9.0",
+    "zod": "^4.3.5"
+  }
+}
