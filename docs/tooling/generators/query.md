@@ -7,7 +7,7 @@ Similar to [Command Generator](command.md) but for **read operations**.
 ## Quick Start
 
 ```bash
-nx generate query --context=orders --name=GetOrdersByCustomer --result="Order[]"
+nx generate @local/ddd:query --context=orders --name=GetOrdersByCustomer --result="Order[]"
 ```
 
 **Creates**:

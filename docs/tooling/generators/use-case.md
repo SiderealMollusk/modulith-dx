@@ -7,7 +7,7 @@ See [docs/ddd-implementation/primitives/use-case/specification.md](../../ddd-imp
 ## Quick Start
 
 ```bash
-nx generate use-case --context=orders --name=PlaceOrder
+nx generate @local/ddd:use-case --context=orders --name=PlaceOrder
 ```
 
 **Creates**:

@@ -27,7 +27,7 @@ Create a **Command** when you need to **mutate application state**:
 ## Quick Start
 
 ```bash
-nx generate command --context=orders --name=PlaceOrder --result=Order
+nx generate @local/ddd:command --context=orders --name=PlaceOrder --result=Order
 ```
 
 **Creates**:
@@ -396,8 +396,8 @@ describe('PlaceOrder Serialization', () => {
 ## How to Use (When Generator Exists)
 
 ```bash
-# Create command
-nx generate command --context=orders --name=PlaceOrder --result=Order
+# Create command with Nx
+nx generate @local/ddd:command --context=orders --name=PlaceOrder --result=Order
 
 # Handler uses command
 const cmd = PlaceOrder.create(userInput);

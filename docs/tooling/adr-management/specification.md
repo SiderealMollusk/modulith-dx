@@ -6,14 +6,16 @@
 
 The ADR tool automates the workflow for creating, managing, and tracking Architecture Decision Records.
 
-## Commands
+**Built as**: Nx plugin (`@local/adr`) with generators and executors
 
-### `adr:new <slug>`
+## Commands (Nx Integration)
+
+### `nx generate @local/adr:new --slug=<slug>`
 
 Create a new ADR in `docs/architecture-decisions/proposed/`.
 
 ```bash
-npm run adr:new -- domain-layer-must-be-pure
+nx generate @local/adr:new --slug=domain-layer-must-be-pure
 ```
 
 **Generates**:
@@ -32,12 +34,12 @@ docs/architecture-decisions/proposed/
 
 ---
 
-### `adr:accept <slug>`
+### `nx run tooling:adr-accept --slug=<slug>`
 
 Promote from `proposed/` → `accepted/`, update index, set Status to "Accepted".
 
 ```bash
-npm run adr:accept -- domain-layer-must-be-pure
+nx run tooling:adr-accept --slug=domain-layer-must-be-pure
 ```
 
 **Actions**:
@@ -55,12 +57,12 @@ npm run adr:accept -- domain-layer-must-be-pure
 
 ---
 
-### `adr:deprecate <slug>`
+### `nx run tooling:adr-deprecate --slug=<slug>`
 
 Mark as deprecated, move to `deprecated/`, keep old ADR number.
 
 ```bash
-npm run adr:deprecate -- old-architecture-pattern
+nx run tooling:adr-deprecate --slug=old-architecture-pattern
 ```
 
 **Actions**:
@@ -71,12 +73,12 @@ npm run adr:deprecate -- old-architecture-pattern
 
 ---
 
-### `adr:supersede <old-slug> <new-slug>`
+### `nx run tooling:adr-supersede --old=<old-slug> --new=<new-slug>`
 
 Mark old decision as superseded by new one, link them bidirectionally.
 
 ```bash
-npm run adr:supersede -- old-caching-strategy new-caching-strategy
+nx run tooling:adr-supersede --old=old-caching-strategy --new=new-caching-strategy
 ```
 
 **Actions**:
@@ -95,15 +97,15 @@ npm run adr:supersede -- old-caching-strategy new-caching-strategy
 
 ---
 
-### `adr:list [--status=proposed|accepted|deprecated|superseded]`
+### `nx run tooling:adr-list [--status=...] [--tag=...]`
 
 List all ADRs with status, impact, tags, enforcement.
 
 ```bash
-npm run adr:list
-npm run adr:list -- --status=accepted
-npm run adr:list -- --tag=observability
-npm run adr:list -- --status=accepted --tag=enforcement
+nx run tooling:adr-list
+nx run tooling:adr-list --status=proposed
+nx run tooling:adr-list --tag=observability
+nx run tooling:adr-list --status=accepted --tag=enforcement
 ```
 
 **Output**:
@@ -138,13 +140,13 @@ Total: 24 ADRs
 
 ---
 
-### `adr:validate [--fix]`
+### `nx run tooling:adr-validate [--fix]`
 
 Check all ADRs for metadata compliance (Status, Deciders, Date, Tags, Impact, Enforcement sections).
 
 ```bash
-npm run adr:validate
-npm run adr:validate -- --fix
+nx run tooling:adr-validate
+nx run tooling:adr-validate --fix
 ```
 
 **Checks**:
@@ -301,20 +303,56 @@ The tool automatically maintains `docs/architecture-decisions/adr_index.md`:
 
 ## Implementation Details
 
+### Nx Plugin Structure
+
+```
+tools/adr/
+├── package.json                    # @local/adr plugin
+├── generators/
+│   └── new/
+│       ├── schema.json             # Nx schema for 'new' generator
+│       ├── schema.d.ts
+│       └── index.ts                # Generator implementation
+├── executors/
+│   ├── accept/
+│   │   ├── schema.json
+│   │   └── executor.ts             # Accept ADR executor
+│   ├── deprecate/
+│   │   ├── schema.json
+│   │   └── executor.ts
+│   ├── supersede/
+│   │   ├── schema.json
+│   │   └── executor.ts
+│   ├── list/
+│   │   ├── schema.json
+│   │   └── executor.ts
+│   └── validate/
+│       ├── schema.json
+│       └── executor.ts
+└── src/
+    ├── lib/
+    │   ├── update-index.ts         # Regenerate adr_index.md
+    │   ├── validate-metadata.ts    # Check template compliance
+    │   └── file-operations.ts      # Move/update ADR files
+    └── templates/
+        └── adr-template.md         # ADR file template
+```
+
 ### Dependencies
-- **Language**: TypeScript (tsx to run)
+- **Language**: TypeScript
+- **Framework**: Nx Devkit (`@nx/devkit`)
 - **Filesystem**: Node fs
-- **Templating**: Simple string interpolation
+- **Templating**: Nx generators + string interpolation
 - **Markdown parsing**: Simple regex (extract metadata from YAML-like block)
 
 ### Files Created/Modified
 
 | File | When | What |
 |------|------|------|
-| `scripts/adr.ts` | Install | Main CLI script |
-| `docs/architecture-decisions/{proposed,accepted,deprecated,superseded}/ADR-XXXX-*.md` | adr:new, adr:accept, etc. | Decision documents |
-| `docs/architecture-decisions/adr_index.md` | adr:accept, adr:deprecate, adr:supersede | Auto-generated index |
-| `.adr-metadata.json` (optional) | adr:new | Track next ADR number |
+| `tools/adr/` | Install | Nx plugin (generators + executors) |
+| `docs/architecture-decisions/{proposed,accepted,deprecated,superseded}/ADR-XXXX-*.md` | Generator/executor | Decision documents |
+| `docs/architecture-decisions/adr_index.md` | Executors | Auto-generated index |
+| `.adr-metadata.json` (optional) | Generator | Track next ADR number |
 
 ### Next ADR Number
 

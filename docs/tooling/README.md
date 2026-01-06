@@ -2,30 +2,31 @@
 
 > **Status**: 🟠 Planned infrastructure. [See implementation status](status.md).
 
-This folder contains documentation for the DDD tooling infrastructure: generators, validation scripts, ESLint rules, and ADR management.
+This folder contains documentation for the DDD tooling infrastructure built on **Nx**. Nx is our control plane for code generation, task orchestration, caching, and workspace management.
 
 ## Quick Navigation
 
 **I want to...**
 
 - 🆕 **Create a new primitive** → [Generators](generators/README.md)
-  - `nx generate command --context=myContext --name=MyCommand`
-  - `nx generate query --context=myContext --name=MyQuery`
-  - `nx generate entity --context=myContext --name=MyEntity`
+  - `nx generate @local/ddd:command --context=myContext --name=MyCommand`
+  - `nx generate @local/ddd:query --context=myContext --name=MyQuery`
+  - `nx generate @local/ddd:entity --context=myContext --name=MyEntity`
   
 - 📋 **Create an architecture decision** → [ADR Tool](adr-management/specification.md)
-  - `npm run adr:new -- my-decision`
-  - `npm run adr:accept -- my-decision`
+  - `nx generate @local/adr:new --slug=my-decision`
+  - `nx run tooling:adr-accept --slug=my-decision`
 
 - 🔍 **Fix a lint error** → [ESLint Rules](eslint-rules/README.md)
+  - `nx lint` - Run all ESLint rules
+  - `nx affected:lint` - Lint only changed code
   - `no-logging-in-domain` - Domain must stay pure
   - `require-command-base` - Commands must extend `Command<TResult>`
-  - `require-entity-base` - Entities must extend `BaseEntity<TId>`
 
 - ✅ **What validation happens in CI?** → [CI Scripts](ci-scripts/README.md)
-  - File structure validation
-  - Import dependency validation
-  - Test coverage requirements
+  - `nx affected:test` - Test only affected projects
+  - `nx run-many --target=validate` - Validate all contexts
+  - `nx run tooling:check-structure` - File structure validation
 
 - 🔧 **Set up development environment** → [Quick Start](quick-start.md)
 
@@ -76,11 +77,18 @@ This tooling helps you create and enforce all 13 primitives:
 
 See [docs/ddd-implementation/primitives/](../ddd-implementation/primitives/README.md) for detailed specs.
 
-### Tooling Layers
+### Tooling Layers (All Nx-based)
 
-**Phase 1: Generators** → Scaffold primitives (boilerplate + structure)  
-**Phase 2: Validation** → Ensure correct layer placement (ESLint + scripts)  
-**Phase 3: Management** → Track decisions + update ADR index (ADR tool)  
+**Phase 1: Nx Generators** → Scaffold primitives via `@local/ddd` plugin  
+**Phase 2: Nx Executors** → Validate architecture via custom executors  
+**Phase 3: Nx Plugins** → ADR management, observability, custom tasks  
+
+**Why Nx?**
+- **Computation caching**: Don't re-run unchanged tests/builds
+- **Affected commands**: Only test what changed (`nx affected:test`)
+- **Task orchestration**: Parallel execution, dependency graphs
+- **Extensibility**: Custom generators, executors, plugins for our patterns
+- **Monorepo support**: Scale to dozens of bounded contexts  
 
 ## Architecture Decision Links
 

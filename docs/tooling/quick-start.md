@@ -215,17 +215,17 @@ export class CreateUserUseCase extends BaseUseCase<CreateUserInput, UserDto> {
 Once [Phase 3](../../plans/current.md#phase-3-nx-generators-code-scaffolding) is complete, replace all this with:
 
 ```bash
-# Create a command with validation + serialization tests
-nx generate command --context=orders --name=PlaceOrder --result=OrderId
+# Create a command with validation + serialization tests (Nx generator)
+nx generate @local/ddd:command --context=orders --name=PlaceOrder --result=OrderId
 
-# Create an entity with Brand ID and factory
-nx generate entity --context=orders --name=Order --idType=OrderId
+# Create an entity with Brand ID and factory (Nx generator)
+nx generate @local/ddd:entity --context=orders --name=Order --idType=OrderId
 
-# Create a use case with test stubs
-nx generate use-case --context=orders --name=PlaceOrder
+# Create a use case with test stubs (Nx generator)
+nx generate @local/ddd:use-case --context=orders --name=PlaceOrder
 
 # Create a handler (HTTP, gRPC, CLI variant)
-nx generate handler --context=orders --name=PlaceOrder --protocol=http
+nx generate @local/ddd:handler --context=orders --name=PlaceOrder --protocol=http
 ```
 
 Each generator will:
@@ -235,6 +235,26 @@ Each generator will:
 - ✅ Enforce immutability (readonly fields)
 - ✅ Add to `index.ts` exports
 - ✅ Register in workspace.json
+
+### Nx Workflow Benefits
+
+When the Nx generators exist, you get:
+
+```bash
+# Generate and test in one flow
+nx generate @local/ddd:command --context=orders --name=PlaceOrder
+nx test orders  # Run tests for orders context
+
+# Only test what changed
+nx affected:test --base=main
+
+# Use computation caching (don't re-run unchanged tests)
+nx test orders  # Cached if code unchanged
+
+# Run validations
+nx affected --target=check-structure --base=main
+nx affected --target=validate-imports --base=main
+```
 
 ## File Structure to Follow
 

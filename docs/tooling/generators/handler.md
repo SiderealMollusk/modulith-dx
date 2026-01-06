@@ -8,13 +8,13 @@ See [docs/ddd-implementation/primitives/handler/specification.md](../../ddd-impl
 
 ```bash
 # HTTP handler
-nx generate handler --context=orders --name=PlaceOrder --protocol=http
+nx generate @local/ddd:handler --context=orders --name=PlaceOrder --protocol=http
 
 # gRPC handler
-nx generate handler --context=orders --name=PlaceOrder --protocol=grpc
+nx generate @local/ddd:handler --context=orders --name=PlaceOrder --protocol=grpc
 
 # CLI handler
-nx generate handler --context=orders --name=PlaceOrder --protocol=cli
+nx generate @local/ddd:handler --context=orders --name=PlaceOrder --protocol=cli
 ```
 
 **Creates**:

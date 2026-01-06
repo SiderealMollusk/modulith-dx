@@ -6,28 +6,30 @@
 
 Generators scaffold DDD primitives with correct structure, base classes, validation, and tests. This eliminates boilerplate and enforces architectural patterns.
 
+**Built as**: Nx plugin (`@local/ddd`) with multiple generators
+
 ## Quick Reference
 
 | Primitive | Generator | Creates | Test Files |
 |-----------|-----------|---------|------------|
-| **Entity** | `nx generate entity` | Class + Brand ID | `spec.ts` (unit) |
-| **ValueObject** | `nx generate value-object` | Class + validation | `spec.ts` (unit) |
-| **Command** | `nx generate command` | Class + Zod schema | `validation.spec.ts`, `serialization.spec.ts` |
-| **Query** | `nx generate query` | Class + Zod schema | `validation.spec.ts`, `serialization.spec.ts` |
-| **UseCase** | `nx generate use-case` | Class extending BaseUseCase | `spec.ts`, `integration.spec.ts` |
-| **Handler** | `nx generate handler` | HTTP/gRPC/CLI variant | `spec.ts`, `integration.spec.ts` |
-| **Repository** | `nx generate repository` | Port + Adapter | `integration.spec.ts` |
-| **DomainEvent** | `nx generate domain-event` | Event class | `spec.ts` |
-| **Factory** | `nx generate factory` | Factory with validation | `spec.ts` |
-| **DomainService** | `nx generate domain-service` | Stateless service | `spec.ts` |
-| **Specification** | `nx generate specification` | Policy/rule | `spec.ts` |
+| **Entity** | `nx generate @local/ddd:entity` | Class + Brand ID | `spec.ts` (unit) |
+| **ValueObject** | `nx generate @local/ddd:value-object` | Class + validation | `spec.ts` (unit) |
+| **Command** | `nx generate @local/ddd:command` | Class + Zod schema | `validation.spec.ts`, `serialization.spec.ts` |
+| **Query** | `nx generate @local/ddd:query` | Class + Zod schema | `validation.spec.ts`, `serialization.spec.ts` |
+| **UseCase** | `nx generate @local/ddd:use-case` | Class extending BaseUseCase | `spec.ts`, `integration.spec.ts` |
+| **Handler** | `nx generate @local/ddd:handler` | HTTP/gRPC/CLI variant | `spec.ts`, `integration.spec.ts` |
+| **Repository** | `nx generate @local/ddd:repository` | Port + Adapter | `integration.spec.ts` |
+| **DomainEvent** | `nx generate @local/ddd:domain-event` | Event class | `spec.ts` |
+| **Factory** | `nx generate @local/ddd:factory` | Factory with validation | `spec.ts` |
+| **DomainService** | `nx generate @local/ddd:domain-service` | Stateless service | `spec.ts` |
+| **Specification** | `nx generate @local/ddd:specification` | Policy/rule | `spec.ts` |
 
 ## Usage Pattern
 
 All generators follow this pattern:
 
 ```bash
-nx generate {primitive} \
+nx generate @local/ddd:{primitive} \
   --context=myContext \
   --name=MyName \
   [additional options]
@@ -51,6 +53,8 @@ See individual docs for each:
 ## Implementation Phases
 
 **Phase 3A** (Week 1):
+- Nx workspace configuration
+- `@local/ddd` plugin scaffolding
 - Command generator (most critical, used by all use cases)
 - Query generator
 - Both with validation + serialization tests
@@ -66,6 +70,33 @@ See individual docs for each:
 
 **Phase 3D** (Week 3+):
 - DomainEvent, Factory, DomainService, Specification generators
+
+### Nx Plugin Structure
+
+```
+tools/ddd/
+├── package.json                    # @local/ddd plugin
+├── generators/
+│   ├── command/
+│   │   ├── schema.json             # Nx schema (context, name, result type)
+│   │   ├── schema.d.ts
+│   │   ├── index.ts                # Generator implementation
+│   │   └── templates/              # Command template files
+│   │       ├── __name__.ts.template
+│   │       ├── __name__.validation.spec.ts.template
+│   │       └── __name__.serialization.spec.ts.template
+│   ├── query/
+│   │   └── ... (same structure)
+│   ├── entity/
+│   ├── value-object/
+│   ├── use-case/
+│   ├── handler/
+│   └── repository/
+└── src/
+    └── lib/
+        ├── shared-templates.ts     # Reusable template logic
+        └── naming-utils.ts         # slugToTitle, getNextNumber, etc.
+```
 
 ## Key Features
 
@@ -228,36 +259,36 @@ src/core/identity/
 
 ## Customization Options
 
-Each generator accepts options:
+Each generator accepts options (defined in `schema.json`):
 
 ```bash
 # Entity with custom ID type
-nx generate entity --context=orders --name=Order --idType=OrderId
+nx generate @local/ddd:entity --context=orders --name=Order --idType=OrderId
 
 # Command with custom result type
-nx generate command --context=orders --name=PlaceOrder --result=Order
+nx generate @local/ddd:command --context=orders --name=PlaceOrder --result=Order
 
 # Handler with specific protocol
-nx generate handler --context=orders --name=PlaceOrder --protocol=http
-nx generate handler --context=orders --name=PlaceOrder --protocol=grpc
-nx generate handler --context=orders --name=PlaceOrder --protocol=cli
+nx generate @local/ddd:handler --context=orders --name=PlaceOrder --protocol=http
+nx generate @local/ddd:handler --context=orders --name=PlaceOrder --protocol=grpc
+nx generate @local/ddd:handler --context=orders --name=PlaceOrder --protocol=cli
 
 # UseCase with dependencies
-nx generate use-case --context=orders --name=PlaceOrder \
+nx generate @local/ddd:use-case --context=orders --name=PlaceOrder \
   --deps="OrderRepository,PricingService,EventBus"
 ```
 
 ## Prompts vs Flags
 
-Generators support both:
+Generators support both interactive and CLI-only modes (standard Nx behavior):
 
 ```bash
-# Quiet mode (all flags)
-nx generate command --context=orders --name=PlaceOrder --result=Order
+# Quiet mode (all flags provided)
+nx generate @local/ddd:command --context=orders --name=PlaceOrder --result=Order
 
-# Interactive (missing flags prompt)
-nx generate command --context=orders
-# Prompts: "Name?" "Result type?"
+# Interactive mode (missing flags prompt)
+nx generate @local/ddd:command --context=orders
+# Nx prompts: "Name?" "Result type?"
 ```
 
 ## Integration with Code Review
@@ -281,15 +312,15 @@ Reviewer checklist:
 
 ## Dry Run
 
-See what would be generated without creating files:
+See what would be generated without creating files (standard Nx feature):
 
 ```bash
-nx generate command --context=orders --name=PlaceOrder --dry-run
+nx generate @local/ddd:command --context=orders --name=PlaceOrder --dry-run
 ```
 
 Output:
 ```
-NX Dry-run: Command Generator
+NX Dry-run: @local/ddd:command
 
 Would create:
   CREATE src/core/orders/application/commands/PlaceOrder.ts
@@ -297,7 +328,7 @@ Would create:
   CREATE src/core/orders/application/commands/PlaceOrder.serialization.spec.ts
   UPDATE src/core/orders/application/commands/index.ts
 
-File contents:
+File contents preview:
   [shows class skeleton]
 ```
 

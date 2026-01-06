@@ -94,44 +94,47 @@ When the tooling is built (Phases 1-8):
 
 ### Developers Can
 ```bash
-# Create commands with validation + serialization tests
-nx generate command --context=orders --name=PlaceOrder --result=Order
+# Create commands with validation + serialization tests (Nx generator)
+nx generate @local/ddd:command --context=orders --name=PlaceOrder --result=Order
 
-# Create entities with factories and tests  
-nx generate entity --context=orders --name=Order
+# Create entities with factories and tests (Nx generator)
+nx generate @local/ddd:entity --context=orders --name=Order
 
-# Create use cases with dependency injection
-nx generate use-case --context=orders --name=PlaceOrder
+# Create use cases with dependency injection (Nx generator)
+nx generate @local/ddd:use-case --context=orders --name=PlaceOrder
 
-# Create handlers (HTTP/gRPC/CLI)
-nx generate handler --context=orders --name=PlaceOrder --protocol=http
+# Create handlers (HTTP/gRPC/CLI) (Nx generator)
+nx generate @local/ddd:handler --context=orders --name=PlaceOrder --protocol=http
 
-# Create repos (port + adapter)
-nx generate repository --context=orders --aggregate=Order
+# Create repos (port + adapter) (Nx generator)
+nx generate @local/ddd:repository --context=orders --aggregate=Order
 
-# Create architecture decisions with ADR tool
-npm run adr:new -- my-decision
-npm run adr:accept -- my-decision
-npm run adr:list -- --status=accepted --tag=enforcement
-npm run adr:validate
+# Create architecture decisions (Nx generator/executor)
+nx generate @local/adr:new --slug=my-decision
+nx run tooling:adr-accept --slug=my-decision
+nx run tooling:adr-list --status=accepted --tag=enforcement
+nx run tooling:adr-validate
 ```
 
-### CI/CD Will Validate
+### CI/CD Will Validate (Nx Executors + Affected Commands)
 ```bash
-# File structure compliance
-ops/scripts/check-file-structure.sh
+# File structure compliance (only affected code)
+nx affected --target=check-structure --base=main
 
 # Import boundaries (domain stays pure)
-ops/scripts/validate-imports.sh
+nx affected --target=validate-imports --base=main
 
 # Dual test files for commands/queries
-ops/scripts/check-test-coverage.sh
+nx affected --target=check-coverage --base=main
 
 # Observability inventory up-to-date
-ops/scripts/validate-observability-inventory.sh
+nx run tooling:validate-inventory
 
-# ESLint rules
-npm run lint
+# ESLint rules (only affected code)
+nx affected:lint --base=main
+
+# Tests (only affected code, with caching)
+nx affected:test --base=main
 ```
 
 ## How to Use These Docs

@@ -11,14 +11,14 @@ You have an idea: "Domain layer should stay pure (no logging, no infrastructure)
 
 **1. Create the ADR**
 ```bash
-npm run adr:new -- domain-layer-pure
+nx generate @local/adr:new --slug=domain-layer-pure
 ```
 
 Output:
 ```
-✓ Created: docs/architecture-decisions/proposed/ADR-0021-domain-layer-pure.md
+✅ Created: docs/architecture-decisions/proposed/ADR-0021-domain-layer-pure.md
 
-Edit file and run: npm run adr:accept -- domain-layer-pure
+Edit file and run: nx run tooling:adr-accept --slug=domain-layer-pure
 ```
 
 **2. File created**
@@ -173,7 +173,7 @@ Team reviewed ADR-0021, approved the domain purity principle. Time to accept it.
 
 **1. Accept the ADR**
 ```bash
-npm run adr:accept -- domain-layer-pure
+nx run tooling:adr-accept --slug=domain-layer-pure
 ```
 
 Output:
@@ -276,7 +276,7 @@ Old caching strategy (ADR-0012) is being replaced by a new approach (ADR-0023).
 
 **1. Deprecate old ADR**
 ```bash
-npm run adr:deprecate -- old-caching-strategy
+nx run tooling:adr-deprecate --slug=old-caching-strategy
 ```
 
 Output:
@@ -320,14 +320,14 @@ ADR-0008 (Event Storage v1) was good, but we're replacing it with v2. Want to ke
 
 **1. Create new decision first**
 ```bash
-npm run adr:new -- event-storage-v2
+nx generate @local/adr:new --slug=event-storage-v2
 # Edit file with new design...
-npm run adr:accept -- event-storage-v2
+nx run tooling:adr-accept --slug=event-storage-v2
 ```
 
 **2. Link old → new**
 ```bash
-npm run adr:supersede -- event-storage-v1 event-storage-v2
+nx run tooling:adr-supersede --old=event-storage-v1 --new=event-storage-v2
 ```
 
 Output:
@@ -384,7 +384,7 @@ Event streams can be migrated using the v2 adapter.
 
 ### List All
 ```bash
-npm run adr:list
+nx run tooling:adr-list
 ```
 
 Output:
@@ -410,7 +410,7 @@ Architecture Decision Records (24 total)
 
 ### Filter by Status
 ```bash
-npm run adr:list -- --status=proposed
+nx run tooling:adr-list --status=proposed
 ```
 
 Output:
@@ -432,7 +432,7 @@ PROPOSED ADRs (3)
 
 ### Filter by Tag
 ```bash
-npm run adr:list -- --tag=enforcement
+nx run tooling:adr-list --tag=enforcement
 ```
 
 Output:
@@ -461,7 +461,7 @@ ADRs with tag: enforcement (5)
 
 ### Quick Validation
 ```bash
-npm run adr:validate
+nx run tooling:adr-validate
 ```
 
 Output:
@@ -482,19 +482,19 @@ Run: npm run adr:validate -- --fix  (to auto-fix fixable issues)
 
 ### Auto-Fix
 ```bash
-npm run adr:validate -- --fix
+nx run tooling:adr-validate --fix
 ```
 
 Output:
 ```
-✓ Fixed 1 issue:
-  ✓ ADR-0021: Reformatted date to 2026-01-05
+✅ Fixed 1 issue:
+  ✅ ADR-0021: Reformatted date to 2026-01-05
 
 ⚠️ Manual review needed (2 issues):
   ⚠️ ADR-0020: Add Enforcement section (see template)
   ⚠️ ADR-0024: Check reference to ADR-0099 (does it exist?)
 
-Run: npm run adr:validate again after manual fixes
+Run: nx run tooling:adr-validate again after manual fixes
 ```
 
 ---
@@ -518,7 +518,7 @@ jobs:
         with:
           node-version: '20'
       - run: npm install
-      - run: npm run adr:validate
+      - run: nx run tooling:adr-validate
         # Fails if any critical issues found
 ```
 
@@ -526,8 +526,8 @@ jobs:
 
 ```bash
 # .husky/pre-commit
-npm run adr:validate || {
-  echo "❌ ADR validation failed. Run: npm run adr:validate --fix"
+nx run tooling:adr-validate || {
+  echo "❌ ADR validation failed. Run: nx run tooling:adr-validate --fix"
   exit 1
 }
 ```

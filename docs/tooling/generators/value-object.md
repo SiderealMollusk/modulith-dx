@@ -7,7 +7,7 @@ See [docs/ddd-implementation/primitives/value-object/specification.md](../../ddd
 ## Quick Start
 
 ```bash
-nx generate value-object --context=identity --name=Email
+nx generate @local/ddd:value-object --context=identity --name=Email
 ```
 
 **Creates**:

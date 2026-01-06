@@ -7,24 +7,25 @@
 
 None of the tooling described in this folder currently exists. This is a **documentation specification** for tooling infrastructure that needs to be built.
 
-## What Should Exist
+## What Should Exist (Nx Workspace)
 
 | Component | Purpose | Status |
 |-----------|---------|--------|
-| **ADR Management Tool** | Create/manage Architecture Decision Records | ❌ Not built |
-| **Nx Generators** | Scaffold DDD primitives (Entity, Command, Query, etc.) | ❌ Not built |
-| **ESLint Custom Rules** | Enforce architectural constraints at lint time | ❌ Not built |
-| **CI/CD Scripts** | Validate file structure, imports, test coverage | ❌ Not built |
-| **Dev Container** | Standardized development environment | ❌ Not built |
+| **Nx Workspace** | Control plane for all tooling | ❌ Not configured |
+| **@local/ddd Plugin** | Nx plugin with 7+ generators for DDD primitives | ❌ Not built |
+| **@local/adr Plugin** | Nx generators/executors for ADR management | ❌ Not built |
+| **@local/eslint Plugin** | Custom ESLint rules for architecture enforcement | ❌ Not built |
+| **Nx Executors** | Custom executors for validation (structure, imports, tests) | ❌ Not built |
+| **Dev Container** | Standardized dev environment with Nx CLI | ❌ Not built |
 
 ## Implementation Timeline
 
 See [**Phase-by-Phase Plan**](../../plans/current.md) for detailed breakdown of what needs to be built and in what order.
 
-**Quick summary**:
-- **Week 1**: Directory structure + ADR tool + Command/Query generators
-- **Week 2**: Entity/ValueObject generators + validation scripts + core ESLint rules
-- **Week 3+**: Remaining generators, dev container, documentation
+**Quick summary (Nx-first)**:
+- **Week 1**: Nx workspace setup + `@local/ddd` plugin + Command/Query generators + `@local/adr` plugin
+- **Week 2**: Entity/ValueObject generators + Nx executors for validation + `@local/eslint` plugin
+- **Week 3+**: Remaining generators + affected command integration + caching optimization + dev container
 
 ## For Developers Now
 
@@ -33,7 +34,19 @@ See [**Phase-by-Phase Plan**](../../plans/current.md) for detailed breakdown of 
 2. Use existing examples in [src/core/example/](../../src/core/example/)
 3. Manually create test files (validation + serialization for Commands/Queries)
 
-**Example manually creating a Command**:
+**When Nx tooling is ready, you'll use**:
+```bash
+# Generate with Nx
+nx generate @local/ddd:command --context=orders --name=PlaceOrder
+
+# Run validation
+nx run-many --target=validate --all
+
+# Test only affected code
+nx affected:test --base=main
+```
+
+**Example manually creating a Command (before Nx generators)**:
 ```typescript
 // src/core/orders/application/commands/PlaceOrder.ts
 import { Command } from '@shared/kernel';

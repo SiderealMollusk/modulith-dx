@@ -7,7 +7,7 @@ See [docs/ddd-implementation/primitives/entity/specification.md](../../ddd-imple
 ## Quick Start
 
 ```bash
-nx generate entity --context=orders --name=Order --idType=OrderId
+nx generate @local/ddd:entity --context=orders --name=Order --idType=OrderId
 ```
 
 **Creates**:

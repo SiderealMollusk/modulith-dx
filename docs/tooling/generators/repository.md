@@ -7,7 +7,7 @@ See [docs/ddd-implementation/primitives/repository/specification.md](../../ddd-i
 ## Quick Start
 
 ```bash
-nx generate repository --context=orders --aggregate=Order
+nx generate @local/ddd:repository --context=orders --aggregate=Order
 ```
 
 **Creates**:

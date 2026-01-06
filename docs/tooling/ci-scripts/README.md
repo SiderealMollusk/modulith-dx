@@ -4,26 +4,43 @@
 
 ## Purpose
 
-Shell scripts in `ops/scripts/` validate architecture at CI time:
+Nx executors and shell scripts validate architecture at CI time:
 - File structure follows context-first organization
 - Import dependencies respect layering
 - All Commands/Queries have dual test files
 - Observability inventory is up-to-date
 
+**Built as**: Nx executors + shell scripts in `ops/scripts/`
+
 ## Scripts Overview
 
-| Script | Purpose | When | Status |
-|--------|---------|------|--------|
-| `check-file-structure.sh` | Validate context-first layout | Pre-commit + CI | ❌ Planned |
-| `validate-imports.sh` | Check layer boundaries | CI | ❌ Planned |
-| `check-test-coverage.sh` | Ensure dual tests for Commands/Queries | CI | ❌ Planned |
-| `validate-observability-inventory.sh` | Keep inventory in sync | CI | ❌ Planned |
+| Executor/Script | Purpose | Command | Status |
+|-----------------|---------|---------|--------|
+| `check-structure` | Validate context-first layout | `nx run-many --target=check-structure` | ❌ Planned |
+| `validate-imports` | Check layer boundaries | `nx run-many --target=validate-imports` | ❌ Planned |
+| `check-coverage` | Ensure dual tests for Commands/Queries | `nx run-many --target=check-coverage` | ❌ Planned |
+| `validate-inventory` | Keep observability inventory in sync | `nx run tooling:validate-inventory` | ❌ Planned |
+
+### Nx Affected Integration
+
+Use `nx affected` to run validations only on changed code:
+
+```bash
+# Test only affected contexts
+nx affected:test --base=main
+
+# Lint only affected code
+nx affected:lint --base=main
+
+# Validate only affected contexts
+nx affected --target=check-structure --base=main
+```
 
 ## Script Details
 
-### `check-file-structure.sh`
+### `nx run <project>:check-structure`
 
-**What it does**: Validate that primitives are in correct folders.
+**What it does**: Validate that primitives are in correct folders (implemented as Nx executor).
 
 **Checks**:
 - ✅ Entities in `{context}/domain/entities/`
@@ -37,7 +54,14 @@ Shell scripts in `ops/scripts/` validate architecture at CI time:
 
 **Usage**:
 ```bash
-ops/scripts/check-file-structure.sh
+# Check all projects
+nx run-many --target=check-structure --all
+
+# Check only affected
+nx affected --target=check-structure --base=main
+
+# Check specific context
+nx run orders:check-structure
 ```
 
 **Output (pass)**:
@@ -98,9 +122,9 @@ echo "✓ All files in correct locations"
 
 ---
 
-### `validate-imports.sh`
+### `nx run <project>:validate-imports`
 
-**What it does**: Ensure imports respect layering rules.
+**What it does**: Ensure imports respect layering rules (Nx executor).
 
 **Rules**:
 - ❌ Domain cannot import from `application/`, `infrastructure/`, `interface/`
@@ -110,7 +134,11 @@ echo "✓ All files in correct locations"
 
 **Usage**:
 ```bash
-ops/scripts/validate-imports.sh
+# Validate all projects
+nx run-many --target=validate-imports --all
+
+# Validate only changed code
+nx affected --target=validate-imports --base=main
 ```
 
 **Output (pass)**:
@@ -193,9 +221,9 @@ echo "✓ All imports respect layer boundaries"
 
 ---
 
-### `check-test-coverage.sh`
+### `nx run <project>:check-coverage`
 
-**What it does**: Ensure Commands/Queries have both test files.
+**What it does**: Ensure Commands/Queries have both test files (Nx executor).
 
 **Requirements**:
 - Every `Command` must have `{Name}.validation.spec.ts` + `{Name}.serialization.spec.ts`
@@ -204,7 +232,11 @@ echo "✓ All imports respect layer boundaries"
 
 **Usage**:
 ```bash
-ops/scripts/check-test-coverage.sh
+# Check all projects
+nx run-many --target=check-coverage --all
+
+# Check only affected
+nx affected --target=check-coverage --base=main
 ```
 
 **Output (pass)**:
@@ -244,9 +276,9 @@ UseCases:
 
 ---
 
-### `validate-observability-inventory.sh`
+### `nx run tooling:validate-inventory`
 
-**What it does**: Check that [OBSERVABILITY_INVENTORY.md](../../enforced-architecture/OBSERVABILITY_INVENTORY/README.md) is up-to-date.
+**What it does**: Check that [OBSERVABILITY_INVENTORY.md](../../enforced-architecture/OBSERVABILITY_INVENTORY/README.md) is up-to-date (Nx executor).
 
 **Scans for**:
 - All UseCase classes → Should have `✅` in inventory (logging, tracing, metrics)
@@ -255,7 +287,10 @@ UseCases:
 
 **Usage**:
 ```bash
-ops/scripts/validate-observability-inventory.sh
+nx run tooling:validate-inventory
+
+# Auto-update inventory
+nx run tooling:validate-inventory --update
 ```
 
 **Output (pass)**:
@@ -293,7 +328,7 @@ Found 42 Domain classes:
 ⚠️  Incorrectly marked:
   - Order.ts (marked as ❌ pure, but imports Logger!)
 
-Run: ops/scripts/validate-observability-inventory.sh --update
+Run: nx run tooling:validate-inventory --update
      to auto-update inventory
 ```
 
@@ -314,22 +349,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Required for nx affected
       - uses: actions/setup-node@v3
         with:
           node-version: '20'
       - run: npm install
       
-      - name: Check File Structure
-        run: ops/scripts/check-file-structure.sh
+      - name: Check File Structure (Affected)
+        run: nx affected --target=check-structure --base=origin/main
       
-      - name: Validate Imports
-        run: ops/scripts/validate-imports.sh
+      - name: Validate Imports (Affected)
+        run: nx affected --target=validate-imports --base=origin/main
       
-      - name: Check Test Coverage
-        run: ops/scripts/check-test-coverage.sh
+      - name: Check Test Coverage (Affected)
+        run: nx affected --target=check-coverage --base=origin/main
       
-      - name: Validate Observability
-        run: ops/scripts/validate-observability-inventory.sh
+      - name: Lint (Affected)
+        run: nx affected:lint --base=origin/main
+      
+      - name: Test (Affected)
+        run: nx affected:test --base=origin/main
+      
+      - name: Validate Observability Inventory
+        run: nx run tooling:validate-inventory
 ```
 
 ### Pre-commit Hook
@@ -340,12 +383,13 @@ jobs:
 
 echo "🏗️  Checking architecture..."
 
-ops/scripts/check-file-structure.sh || {
+# Validate changed files only
+nx affected --target=check-structure --base=HEAD~1 || {
   echo "❌ File structure validation failed"
   exit 1
 }
 
-ops/scripts/validate-imports.sh || {
+nx affected --target=validate-imports --base=HEAD~1 || {
   echo "❌ Import validation failed"
   exit 1
 }
