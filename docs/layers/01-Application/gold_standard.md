@@ -2,6 +2,8 @@
 
 Your TypeScript/Node.js domain logic, organized by bounded contexts using DDD principles.
 
+> **Note:** This layer uses DDD primitives (Commands, Queries, Entities, Use Cases, Handlers, Repositories, Value Objects, Domain Events). For detailed specs, enforcement rules, and generators for each primitive, see [PRIMITIVES_MANIFEST.md](../../PRIMITIVES_MANIFEST.md).
+
 ## Overview
 
 **What you build:**
@@ -27,27 +29,27 @@ Your TypeScript/Node.js domain logic, organized by bounded contexts using DDD pr
 - Inventory verification workflows
 
 ### Artifact Structure
-```
-src/
-  core/
-    <context>/
-      domain/
-        entities/          ← Immutable, side-effect-free
-        valueObjects/      ← Branded types (UserId, Email)
-        policies/          ← Business rules (PasswordPolicy)
-        events/            ← DomainEvent(occurredAt, eventType)
-      application/
-        use-cases/         ← Orchestration with Logger/Clock
-        ports/             ← Repository interfaces
-        dtos/              ← Type-safe data transfer
-      infrastructure/
-        adapters/          ← DB queries emit spans (latency)
-        mappers/           ← Observable layer boundary
-      interface/
-        handlers/          ← Extract traceId/spanId from headers
-                           ← Create span: "CreateUser"
-                           ← Log with context (userId, email)
-```
+
+The Application layer uses standard DDD primitives to organize code:
+
+| Primitive | Location | Purpose | Spec |
+|-----------|----------|---------|------|
+| **Command** | `application/commands/` | Immutable request to mutate state | [spec](../../PRIMITIVES_MANIFEST.md#1-command) |
+| **Query** | `application/queries/` | Immutable request to read data | [spec](../../PRIMITIVES_MANIFEST.md#2-query) |
+| **Entity** | `domain/entities/` | Mutable aggregate root with invariants | [spec](../../PRIMITIVES_MANIFEST.md#3-entity-aggregate-root) |
+| **ValueObject** | `domain/value-objects/` | Immutable concept with validation | [spec](../../PRIMITIVES_MANIFEST.md#4-value-object) |
+| **UseCase** | `application/use-cases/` | Orchestrator of business logic | [spec](../../PRIMITIVES_MANIFEST.md#5-use-case) |
+| **Handler** | `interface/handlers/` | Transport adapter (HTTP/gRPC/CLI) | [spec](../../PRIMITIVES_MANIFEST.md#6-handler-httpgrpccli) |
+| **Repository** | `application/ports/` + `infrastructure/adapters/` | Data access abstraction | [spec](../../PRIMITIVES_MANIFEST.md#7-repository-port--adapter) |
+| **DomainEvent** | `domain/events/` | Immutable record of what happened | [spec](../../PRIMITIVES_MANIFEST.md#8-domain-event) |
+
+For each primitive, [PRIMITIVES_MANIFEST.md](../../PRIMITIVES_MANIFEST.md) provides:
+- Full specification and enforcement rules
+- Generator commands to scaffold
+- Instance-level spec/enforcement templates to customize per artifact
+
+---
+
 
 ### Example Trace Flow
 ```
@@ -64,18 +66,41 @@ POST /users (traceid: abc123)
 
 ## Create New
 
-When scaffolding a new bounded context:
+When scaffolding a new bounded context, use generators for each primitive:
 
-1. **Create directory structure** under `src/core/<context>/`
-2. **Start with domain** (entities, value objects, policies, events)
-3. **Add application** (use cases orchestrating with ports)
-4. **Define ports** (repository interfaces) before adapters
-5. **Implement infrastructure** (repository adapters, mappers)
-6. **Wire interface** (HTTP handlers, validators, presenters)
-7. **Add tests** alongside each layer (unit + integration)
-8. **Document** in OBSERVABILITY_INVENTORY.md
+```bash
+# Generate a command
+nx generate @local/ddd:command --context=orders --name=PlaceOrder --result=Order
 
-Example scaffolding:
+# Generate a query
+nx generate @local/ddd:query --context=orders --name=GetOrdersByCustomer --result="Order[]"
+
+# Generate an entity (aggregate root)
+nx generate @local/ddd:entity --context=orders --name=Order --idType=OrderId
+
+# Generate a use case
+nx generate @local/ddd:use-case --context=orders --name=PlaceOrder
+
+# Generate a handler (HTTP)
+nx generate @local/ddd:handler --context=orders --name=PlaceOrder --protocol=http
+
+# Generate a repository
+nx generate @local/ddd:repository --context=orders --aggregate=Order
+```
+
+Each generator creates:
+- The main artifact (Command, Entity, UseCase, etc.)
+- Required test stubs (validation, serialization, integration)
+- **Instance spec file** ({Name}.specification.md) — customize what makes this artifact unique
+- **Instance enforcement file** ({Name}.enforcement.md) — document what must not change
+
+See [PRIMITIVES_MANIFEST.md](../../PRIMITIVES_MANIFEST.md) for generator details and specs per primitive.
+
+---
+
+## Manual Scaffolding Reference
+
+If not using generators, here's the directory structure:
 ```bash
 src/core/orders/
 ├── domain/
